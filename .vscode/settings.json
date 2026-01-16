@@ -1,0 +1,21 @@
+{
+	"files.watcherExclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"search.exclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"files.readonlyInclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"[zmodel-v3]": {
+		"editor.defaultFormatter": "zenstack.zenstack-v3"
+	},
+	"files.associations": {
+		"*.css": "tailwindcss",
+		"*.zmodel": "zmodel-v3"
+	},
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"typescript.preferences.preferTypeOnlyAutoImports": true,
+	"typescript.preferences.autoImportFileExcludePatterns": ["@radix-ui", "radix-ui", "@base-ui", "base-ui"]
+}
