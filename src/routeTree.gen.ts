@@ -9,38 +9,95 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TabRouteImport } from './routes/_tab'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TabStatsRouteImport } from './routes/_tab/stats'
+import { Route as TabPlayersRouteImport } from './routes/_tab/players'
+import { Route as TabMatchesRouteImport } from './routes/_tab/matches'
+import { Route as TabCompareRouteImport } from './routes/_tab/compare'
 
+const TabRoute = TabRouteImport.update({
+  id: '/_tab',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TabStatsRoute = TabStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => TabRoute,
+} as any)
+const TabPlayersRoute = TabPlayersRouteImport.update({
+  id: '/players',
+  path: '/players',
+  getParentRoute: () => TabRoute,
+} as any)
+const TabMatchesRoute = TabMatchesRouteImport.update({
+  id: '/matches',
+  path: '/matches',
+  getParentRoute: () => TabRoute,
+} as any)
+const TabCompareRoute = TabCompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => TabRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/compare': typeof TabCompareRoute
+  '/matches': typeof TabMatchesRoute
+  '/players': typeof TabPlayersRoute
+  '/stats': typeof TabStatsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/compare': typeof TabCompareRoute
+  '/matches': typeof TabMatchesRoute
+  '/players': typeof TabPlayersRoute
+  '/stats': typeof TabStatsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_tab': typeof TabRouteWithChildren
+  '/_tab/compare': typeof TabCompareRoute
+  '/_tab/matches': typeof TabMatchesRoute
+  '/_tab/players': typeof TabPlayersRoute
+  '/_tab/stats': typeof TabStatsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/compare' | '/matches' | '/players' | '/stats'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/compare' | '/matches' | '/players' | '/stats'
+  id:
+    | '__root__'
+    | '/'
+    | '/_tab'
+    | '/_tab/compare'
+    | '/_tab/matches'
+    | '/_tab/players'
+    | '/_tab/stats'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  TabRoute: typeof TabRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_tab': {
+      id: '/_tab'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof TabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +105,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_tab/stats': {
+      id: '/_tab/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof TabStatsRouteImport
+      parentRoute: typeof TabRoute
+    }
+    '/_tab/players': {
+      id: '/_tab/players'
+      path: '/players'
+      fullPath: '/players'
+      preLoaderRoute: typeof TabPlayersRouteImport
+      parentRoute: typeof TabRoute
+    }
+    '/_tab/matches': {
+      id: '/_tab/matches'
+      path: '/matches'
+      fullPath: '/matches'
+      preLoaderRoute: typeof TabMatchesRouteImport
+      parentRoute: typeof TabRoute
+    }
+    '/_tab/compare': {
+      id: '/_tab/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof TabCompareRouteImport
+      parentRoute: typeof TabRoute
+    }
   }
 }
 
+interface TabRouteChildren {
+  TabCompareRoute: typeof TabCompareRoute
+  TabMatchesRoute: typeof TabMatchesRoute
+  TabPlayersRoute: typeof TabPlayersRoute
+  TabStatsRoute: typeof TabStatsRoute
+}
+
+const TabRouteChildren: TabRouteChildren = {
+  TabCompareRoute: TabCompareRoute,
+  TabMatchesRoute: TabMatchesRoute,
+  TabPlayersRoute: TabPlayersRoute,
+  TabStatsRoute: TabStatsRoute,
+}
+
+const TabRouteWithChildren = TabRoute._addFileChildren(TabRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  TabRoute: TabRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
