@@ -10,5 +10,5 @@ export const statsItems = [
 	{ name: "Batting", url: "/stats/batting", icon: "/icons/bat.png" },
 	{ name: "Bowling", url: "/stats/bowling", icon: "/icons/ball.png" },
 	{ name: "Fielding", url: "/stats/fielding", icon: "/icons/fielding.png" },
-	{ name: "MOM", url: "/stats/man-of-match", icon: "/icons/medal.png" },
+	{ name: "POTM", url: "/stats/player-of-the-match", icon: "/icons/medal.png" },
 ];

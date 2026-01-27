@@ -42,6 +42,7 @@ model Dates {
   matches   Matches[]
   innings   Innings[]
   records   Records[]
+  expenses  Expenses[]
   @@map("dates")
 }
 
@@ -64,55 +65,55 @@ model Matches {
 }
 
 model Innings {
-  id       Int        @id
-  runs     Int        @default(0)
-  balls    Int        @default(0)
-  wickets  Int        @default(0)
-  allOuts  Int        @default(0)
-  teamId   String
-  team     Teams      @relation(fields: [teamId], references: [name])
-  matchId  Int
-  match    Matches    @relation(fields: [matchId], references: [id])
-  dateId   DateTime   @db.Date
-  date     Dates      @relation(fields: [dateId], references: [date])
+  id      Int      @id
+  runs    Int      @default(0)
+  balls   Int      @default(0)
+  wickets Int      @default(0)
+  allOuts Int      @default(0)
+  teamId  String
+  team    Teams    @relation(fields: [teamId], references: [name])
+  matchId Int
+  match   Matches  @relation(fields: [matchId], references: [id])
+  dateId  DateTime @db.Date
+  date    Dates    @relation(fields: [dateId], references: [date])
   @@map("innings")
 }
 
 model Batters {
-  id        Int     @id
-  runs      Int     @default(0)
-  balls     Int     @default(0)
-  fours     Int     @default(0)
-  sixes     Int     @default(0)
-  dots      Int     @default(0)
-  outs      Int     @default(0)
-  ducks     Int     @default(0)
-  playerId  String
-  player    Players @relation(fields: [playerId], references: [name])
+  id       Int     @id
+  runs     Int     @default(0)
+  balls    Int     @default(0)
+  fours    Int     @default(0)
+  sixes    Int     @default(0)
+  dots     Int     @default(0)
+  outs     Int     @default(0)
+  ducks    Int     @default(0)
+  playerId String
+  player   Players @relation(fields: [playerId], references: [name])
   @@map("batting")
 }
 
 model Bowlers {
-  id        Int     @id
-  runs      Int     @default(0)
-  balls     Int     @default(0)
-  wickets   Int     @default(0)
-  fours     Int     @default(0)
-  sixes     Int     @default(0)
-  dots      Int     @default(0)
-  wides     Int     @default(0)
-  noBalls   Int     @default(0)
-  playerId  String
-  player    Players @relation(fields: [playerId], references: [name])
+  id       Int     @id
+  runs     Int     @default(0)
+  balls    Int     @default(0)
+  wickets  Int     @default(0)
+  fours    Int     @default(0)
+  sixes    Int     @default(0)
+  dots     Int     @default(0)
+  wides    Int     @default(0)
+  noBalls  Int     @default(0)
+  playerId String
+  player   Players @relation(fields: [playerId], references: [name])
   @@map("bowling")
 }
 
 model Fielders {
-  id        Int     @id
-  catches   Int     @default(0)
-  runOuts   Int     @default(0)
-  playerId  String
-  player    Players @relation(fields: [playerId], references: [name])
+  id       Int     @id
+  catches  Int     @default(0)
+  runOuts  Int     @default(0)
+  playerId String
+  player   Players @relation(fields: [playerId], references: [name])
   @@map("fielding")
 }
 
@@ -130,4 +131,14 @@ model Records {
   dateId   DateTime @db.Date
   date     Dates    @relation(fields: [dateId], references: [date])
   @@map("records")
+}
+
+model Expenses {
+  id        Int      @id
+  groundFee Int      @default(0)
+  gearCost  Int      @default(0)
+  foodCost  Int      @default(0)
+  dateId    DateTime @db.Date
+  date      Dates    @relation(fields: [dateId], references: [date])
+  @@map("expenses")
 }
