@@ -40,14 +40,16 @@ model Dates {
   rivalryId String?
   rivalry   Rivalries? @relation(fields: [rivalryId], references: [title])
   matches   Matches[]
-  innings   Innings[]
+  batting   Batters[]
+  bowling   Bowlers[]
+  fielding  Fielders[]
   records   Records[]
   expenses  Expenses[]
   @@map("dates")
 }
 
 model Matches {
-  id              Int       @id
+  id              Int       @id @default(autoincrement())
   title           String
   totalOvers      Int
   winByRuns       Int?
@@ -65,60 +67,68 @@ model Matches {
 }
 
 model Innings {
-  id      Int      @id
-  runs    Int      @default(0)
-  balls   Int      @default(0)
-  wickets Int      @default(0)
-  allOuts Int      @default(0)
+  id      Int     @id @default(autoincrement())
+  runs    Int     @default(0)
+  balls   Int     @default(0)
+  wickets Int     @default(0)
+  allOuts Int     @default(0)
   teamId  String
-  team    Teams    @relation(fields: [teamId], references: [name])
+  team    Teams   @relation(fields: [teamId], references: [name])
   matchId Int
-  match   Matches  @relation(fields: [matchId], references: [id])
-  dateId  DateTime @db.Date
-  date    Dates    @relation(fields: [dateId], references: [date])
+  match   Matches @relation(fields: [matchId], references: [id])
   @@map("innings")
 }
 
 model Batters {
-  id       Int     @id
-  runs     Int     @default(0)
-  balls    Int     @default(0)
-  fours    Int     @default(0)
-  sixes    Int     @default(0)
-  dots     Int     @default(0)
-  outs     Int     @default(0)
-  ducks    Int     @default(0)
-  playerId String
-  player   Players @relation(fields: [playerId], references: [name])
+  innings      Int      @default(0)
+  runs         Int      @default(0)
+  balls        Int      @default(0)
+  highestScore Int      @default(0)
+  notOuts      Int      @default(0)
+  fours        Int      @default(0)
+  sixes        Int      @default(0)
+  dots         Int      @default(0)
+  ducks        Int      @default(0)
+  playerId     String
+  player       Players  @relation(fields: [playerId], references: [name])
+  dateId       DateTime @db.Date
+  date         Dates    @relation(fields: [dateId], references: [date])
+  @@id([playerId, dateId])
   @@map("batting")
 }
 
 model Bowlers {
-  id       Int     @id
-  runs     Int     @default(0)
-  balls    Int     @default(0)
-  wickets  Int     @default(0)
-  fours    Int     @default(0)
-  sixes    Int     @default(0)
-  dots     Int     @default(0)
-  wides    Int     @default(0)
-  noBalls  Int     @default(0)
+  innings  Int      @default(0)
+  runs     Int      @default(0)
+  balls    Int      @default(0)
+  wickets  Int      @default(0)
+  fours    Int      @default(0)
+  sixes    Int      @default(0)
+  dots     Int      @default(0)
+  wides    Int      @default(0)
+  noBalls  Int      @default(0)
   playerId String
-  player   Players @relation(fields: [playerId], references: [name])
+  player   Players  @relation(fields: [playerId], references: [name])
+  dateId   DateTime @db.Date
+  date     Dates    @relation(fields: [dateId], references: [date])
+  @@id([playerId, dateId])
   @@map("bowling")
 }
 
 model Fielders {
-  id       Int     @id
-  catches  Int     @default(0)
-  runOuts  Int     @default(0)
+  innings  Int      @default(0)
+  catches  Int      @default(0)
+  runOuts  Int      @default(0)
   playerId String
-  player   Players @relation(fields: [playerId], references: [name])
+  player   Players  @relation(fields: [playerId], references: [name])
+  dateId   DateTime @db.Date
+  date     Dates    @relation(fields: [dateId], references: [date])
+  @@id([playerId, dateId])
   @@map("fielding")
 }
 
 model Records {
-  id       Int      @id
+  id       Int      @id @default(autoincrement())
   runs     Int      @default(0)
   wickets  Int      @default(0)
   fours    Int      @default(0)
@@ -134,7 +144,7 @@ model Records {
 }
 
 model Expenses {
-  id        Int      @id
+  id        Int      @id @default(autoincrement())
   groundFee Int      @default(0)
   gearCost  Int      @default(0)
   foodCost  Int      @default(0)
