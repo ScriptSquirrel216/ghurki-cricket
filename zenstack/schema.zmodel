@@ -52,8 +52,7 @@ model Matches {
   id              Int       @id @default(autoincrement())
   title           String
   totalOvers      Int
-  winByRuns       Int?
-  winByWickets    Int?
+  winBy           String
   videoUrl        String?   @url
   scorecardUrl    String?   @url
   winnerId        String
