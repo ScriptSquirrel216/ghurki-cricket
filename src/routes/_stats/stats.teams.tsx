@@ -4,7 +4,7 @@ import { createServerFn } from "@tanstack/react-start";
 import type { Teams } from "zenstack/output/models";
 import { z } from "zod";
 
-import { DateFilter, dateSearchSchema } from "@/components/date-filter";
+import { DateFilter, dateSearchSchema, type DateSearchSchema } from "@/components/date-filter";
 import { TabsLayout } from "@/components/tabs/tabs-layout";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,11 +12,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { db } from "@/lib/db";
 import { ballsToOvers } from "@/lib/utils";
 
-const teamStatsQueryOptions = (teams: Teams[], date?: string[]) => {
+const teamStatsQueryOptions = ({ teams, date, rivalry }: { teams: Teams[] } & DateSearchSchema) => {
 	const teamIds = teams.map((team) => team.name);
-	const teamStats = teamIds.map((teamId) => getTeamStats({ data: { teamId, date } }));
+	const teamStats = teamIds.map((teamId) => getTeamStats({ data: { teamId, date, rivalry } }));
 	return queryOptions({
-		queryKey: ["teams-stats", ...teamIds, ...(date ?? ["all-time"])],
+		queryKey: ["teams-stats", ...teamIds, date ?? rivalry ?? "all-time"],
 		queryFn: async () => await Promise.all(teamStats),
 	});
 };
@@ -28,13 +28,13 @@ const getTeams = createServerFn({ method: "GET" }).handler(async () => {
 
 const getTeamStats = createServerFn({ method: "GET" })
 	.inputValidator(dateSearchSchema.extend({ teamId: z.string() }))
-	.handler(async ({ data: { teamId, date } }) => {
+	.handler(async ({ data: { teamId, date, rivalry } }) => {
 		const [wonMatches, lowestScore, highestScore, aggregate] = await Promise.all([
-			db.matches.count({ where: { winnerId: teamId, dateId: { in: date } } }),
-			db.innings.findFirst({ where: { teamId, match: { dateId: { in: date } } }, orderBy: { runs: "asc" } }),
-			db.innings.findFirst({ where: { teamId, match: { dateId: { in: date } } }, orderBy: { runs: "desc" } }),
+			db.matches.count({ where: { winnerId: teamId, date: { date, rivalryId: rivalry } } }),
+			db.innings.findFirst({ where: { teamId, match: { date: { date, rivalryId: rivalry } } }, orderBy: { runs: "asc" } }),
+			db.innings.findFirst({ where: { teamId, match: { date: { date, rivalryId: rivalry } } }, orderBy: { runs: "desc" } }),
 			db.innings.aggregate({
-				where: { teamId, match: { dateId: { in: date } } },
+				where: { teamId, match: { date: { date, rivalryId: rivalry } } },
 				_sum: { runs: true, balls: true, wickets: true, allOuts: true },
 			}),
 		]);
@@ -58,11 +58,11 @@ const getTeamStats = createServerFn({ method: "GET" })
 export const Route = createFileRoute("/_stats/stats/teams")({
 	head: () => ({ meta: [{ title: "Teams Stats" }] }),
 	beforeLoad: () => getTeams(),
-	loader: async ({ context }) => await context.queryClient.ensureQueryData(teamStatsQueryOptions(context.teams, context.date)),
+	loader: async ({ context }) => await context.queryClient.ensureQueryData(teamStatsQueryOptions(context)),
 	component: () => {
 		const isMobile = useIsMobile();
-		const { teams, date } = Route.useRouteContext();
-		const { data } = useSuspenseQuery(teamStatsQueryOptions(teams, date));
+		const context = Route.useRouteContext();
+		const { data } = useSuspenseQuery(teamStatsQueryOptions(context));
 		const totalMatches = data.reduce((acc, { wonMatches }) => acc + wonMatches, 0);
 		const teamStats = data
 			.map((stat) => ({

@@ -9,8 +9,9 @@ export type BattingStats = {
 	average: number;
 	fours: number;
 	sixes: number;
-	dots: number;
 	ducks: number;
+	fifties: number;
+	hundreds: number;
 };
 
 export type BowlingStats = {
@@ -21,11 +22,11 @@ export type BowlingStats = {
 	balls: number;
 	economy: number;
 	average: number;
-	fours: number;
-	sixes: number;
 	dots: number;
 	wides: number;
 	no_balls: number;
+	"2fr": number;
+	"3fr": number;
 };
 
 export type FieldingStats = {

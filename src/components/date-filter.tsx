@@ -16,12 +16,22 @@ import {
 	DropdownMenuRadioItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
 export const dateSearchSchema = z.object({
-	date: z.array(z.string().transform((val) => new Date(val))).optional(),
+	date: z
+		.string()
+		.optional()
+		.transform((value) => (value ? new Date(value) : undefined)),
+	rivalry: z.string().optional(),
 });
+
+export type DateSearchSchema = {
+	date?: string;
+	rivalry?: string;
+};
 
 export const datesQueryOptions = () => {
 	return queryOptions({
@@ -31,40 +41,47 @@ export const datesQueryOptions = () => {
 };
 
 export const getDates = createServerFn({ method: "GET" }).handler(async () => {
-	const [rivalries, dates] = await db.$transaction([
-		db.rivalries.findMany({ orderBy: { start: "asc" }, select: { title: true, dates: true } }),
-		db.dates.findMany({ orderBy: { date: "asc" }, select: { date: true, title: true } }),
-	]);
+	const dates = await db.dates.findMany({ orderBy: { date: "asc" }, select: { date: true, title: true, rivalryId: true } });
+
+	const rivalriesCount = dates.reduce(
+		(acc, { rivalryId }) => {
+			if (rivalryId) {
+				acc[rivalryId] = (acc[rivalryId] || 0) + 1;
+			}
+			return acc;
+		},
+		{} as Record<string, number>,
+	);
+
 	return {
 		dates: dates.map(({ date, title }) => ({ title, date: format(date, "yyyy-MM-dd") })),
-		rivalries: rivalries.map(({ title, dates }) => ({ title, dates: dates.map(({ date }) => format(date, "yyyy-MM-dd")) })),
+		rivalries: Object.entries(rivalriesCount).map(([title, series]) => ({ title, series })),
 	};
 });
 
 type DateFilterProps = React.ComponentProps<typeof Button> & {
-	align?: "start" | "end" | "center";
 	hasRivalries?: boolean;
 	hasDates?: boolean;
 };
 
-export function DateFilter({ align = "center", hasRivalries = true, hasDates = true, ...props }: DateFilterProps) {
+export function DateFilter({ hasRivalries = true, hasDates = true, ...props }: DateFilterProps) {
+	const isMobile = useIsMobile();
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const { data } = useSuspenseQuery(datesQueryOptions());
-	const { date: selectedDate } = useSearch({ strict: false }) as { date?: string[] };
-	const isRivalry = data.rivalries.find((rivalry) => JSON.stringify(rivalry.dates) === JSON.stringify(selectedDate));
+	const { date: selectedDate, rivalry: selectedRivalry } = useSearch({ strict: false });
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button variant="outline" {...props}>
 					<HugeiconsIcon icon={Calendar02Icon} strokeWidth={2} />
-					{formatDate(selectedDate) ?? isRivalry?.title ?? "All Time"}
+					{formatDate(selectedDate) ?? selectedRivalry ?? "All Time"}
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align={align} className="w-auto">
+			<DropdownMenuContent align={isMobile ? "center" : "end"} className="w-auto">
 				<DropdownMenuRadioGroup
-					value={selectedDate ? selectedDate.toString() : ""}
-					onValueChange={() => navigate({ to: pathname, search: (prev) => ({ ...prev, date: undefined }) })}
+					value={!selectedDate && !selectedRivalry ? "" : "none"}
+					onValueChange={() => navigate({ to: pathname, search: (prev) => ({ ...prev, date: undefined, rivalry: undefined }) })}
 				>
 					<DropdownMenuRadioItem value="">All Time</DropdownMenuRadioItem>
 				</DropdownMenuRadioGroup>
@@ -72,13 +89,15 @@ export function DateFilter({ align = "center", hasRivalries = true, hasDates = t
 					<DropdownMenuGroup>
 						<DropdownMenuLabel>Rivalries</DropdownMenuLabel>
 						<DropdownMenuRadioGroup
-							value={selectedDate?.toString()}
-							onValueChange={(value) => navigate({ to: pathname, search: (prev) => ({ ...prev, date: value.split(",") }) })}
+							value={selectedRivalry}
+							onValueChange={(value) =>
+								navigate({ to: pathname, search: (prev) => ({ ...prev, date: undefined, rivalry: value }) })
+							}
 						>
-							{data.rivalries.map(({ title, dates }) => (
-								<DropdownMenuRadioItem key={title} value={dates.toString()}>
+							{data.rivalries.map(({ title, series }) => (
+								<DropdownMenuRadioItem key={title} value={title}>
 									<span>{title}</span>
-									<span className="text-muted-foreground">({dates.length} Series)</span>
+									<span className="text-muted-foreground">({series} Series)</span>
 								</DropdownMenuRadioItem>
 							))}
 						</DropdownMenuRadioGroup>
@@ -89,7 +108,9 @@ export function DateFilter({ align = "center", hasRivalries = true, hasDates = t
 						<DropdownMenuLabel>Series</DropdownMenuLabel>
 						<DropdownMenuRadioGroup
 							value={selectedDate?.toString()}
-							onValueChange={(value) => navigate({ to: pathname, search: (prev) => ({ ...prev, date: value }) })}
+							onValueChange={(value) =>
+								navigate({ to: pathname, search: (prev) => ({ ...prev, date: value, rivalry: undefined }) })
+							}
 						>
 							{data.dates.map(({ date, title }) => (
 								<DropdownMenuRadioItem key={date} value={date} className="justify-between">

@@ -5,16 +5,13 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: string[] | Date[] | null | undefined): string | null {
-	if (!date || !date.length) return "All Time";
-	if (date.length === 1) {
-		return new Date(date[0]).toLocaleDateString("en-US", {
-			day: "numeric",
-			year: "numeric",
-			month: "short",
-		});
-	}
-	return null;
+export function formatDate(date: string | Date | null | undefined): string | null {
+	if (!date) return null;
+	return new Date(date).toLocaleDateString("en-US", {
+		day: "numeric",
+		year: "numeric",
+		month: "short"
+	});
 }
 
 export function ballsToOvers(balls: number): string {

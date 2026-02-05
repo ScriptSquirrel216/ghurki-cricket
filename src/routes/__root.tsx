@@ -12,11 +12,9 @@ import { MenuProvider } from "@/context/menu-context";
 import appCss from "../styles.css?url";
 
 const rootSearchSchema = z.object({
-	date: z
-		.union([z.string(), z.array(z.string())])
-		.transform((v) => (Array.isArray(v) ? v : [v]))
-		.optional(),
-}).loose();
+	date: z.string().optional(),
+	rivalry: z.string().optional(),
+});
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
 	head: () => ({
@@ -29,6 +27,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 	}),
 	shellComponent: RootDocument,
 	validateSearch: (search) => rootSearchSchema.parse(search),
+	beforeLoad: ({ search }) => ({ date: search.date, rivalry: search.rivalry }),
 	loader: async ({ context }) =>
 		await Promise.all([
 			context.queryClient.ensureQueryData(playerQueryOptions()),

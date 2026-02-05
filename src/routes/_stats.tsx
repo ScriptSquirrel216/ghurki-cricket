@@ -37,5 +37,4 @@ function StatsLayout() {
 
 export const Route = createFileRoute("/_stats")({
 	component: StatsLayout,
-	beforeLoad: ({ search }) => ({ date: search.date }),
 });
