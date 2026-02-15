@@ -23,7 +23,7 @@ export function StatsFilter({ options, side = "center" }: StatsFilterProps) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline" className="w-full capitalize md:w-fit">
+				<Button variant="outline" className="capitalize">
 					<HugeiconsIcon icon={FilterIcon} strokeWidth={2} />
 					{selectedFilter?.split("-").join(" ") ?? "All Stats"}
 				</Button>

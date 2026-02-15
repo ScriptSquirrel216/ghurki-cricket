@@ -19,9 +19,10 @@ type TabsLayoutProps = React.PropsWithChildren<{
 
 export function TabsLayout({ title, children, className, filters = {} }: TabsLayoutProps) {
 	const { toggleOpen } = useMenu();
+	const showFilters = filters.stats || filters.date !== false;
 	return (
 		<>
-			<header>
+			<header className="sticky top-0 z-10 bg-background">
 				<div className="container mx-auto grid grid-cols-1 gap-3 px-4 py-3 md:grid-cols-2">
 					<div className="flex items-center gap-3">
 						<Button variant="secondary" size="icon" onClick={toggleOpen}>
@@ -29,14 +30,16 @@ export function TabsLayout({ title, children, className, filters = {} }: TabsLay
 						</Button>
 						<h1 className="text-xl/9 font-semibold capitalize">{title}</h1>
 					</div>
-					<div className={cn("flex w-full gap-3 *:flex-1 sm:*:flex-initial md:justify-end", filters.className)}>
-						{filters.stats && <StatsFilter {...filters.stats} />}
-						{filters.date !== false && <DateFilter {...filters.date} />}
-					</div>
+					{showFilters && (
+						<div className={cn("flex w-full gap-3 *:flex-1 sm:justify-end sm:*:flex-initial", filters.className)}>
+							{filters.stats && <StatsFilter {...filters.stats} />}
+							<DateFilter {...filters.date} />
+						</div>
+					)}
 				</div>
 			</header>
-			<div className="h-full flex-1 overflow-y-auto">
-				<div className={cn("container mx-auto flex flex-col gap-4 px-4 pb-3", className)}>{children}</div>
+			<div className="w-full flex-1 pb-22">
+				<div className={cn("container mx-auto flex flex-col gap-4 px-4", className)}>{children}</div>
 			</div>
 		</>
 	);

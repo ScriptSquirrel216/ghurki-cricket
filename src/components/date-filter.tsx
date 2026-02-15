@@ -70,7 +70,7 @@ export function DateFilter({ options = "both", side = "end" }: DateFilterProps) 
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline" className="w-full md:w-fit">
+				<Button variant="outline">
 					<HugeiconsIcon icon={Calendar02Icon} strokeWidth={2} />
 					{formatDate(selectedDate) ?? selectedRivalry ?? "All Time"}
 				</Button>

@@ -8,9 +8,9 @@ export const Route = createFileRoute("/_tab")({
 	component: () => {
 		const { pathname } = useLocation();
 		return (
-			<main className="flex h-dvh flex-col">
+			<main className="flex min-h-dvh flex-col">
 				<Outlet />
-				<footer className="md:border-t">
+				<footer className="fixed bottom-0 w-full border-t bg-background">
 					<div className="container mx-auto grid grid-cols-5 px-1 py-2 md:py-3">
 						{tabItems.map((item) => {
 							const isCurrentRoute = pathname === item.url;
